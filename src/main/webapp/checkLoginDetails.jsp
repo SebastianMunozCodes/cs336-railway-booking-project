@@ -6,8 +6,8 @@ String password = request.getParameter("password");
 
 String url = "jdbc:mysql://localhost:3306/railway_booking";
 String dbUser = "root";    // added my user
-String dbPassword = "add_your_SQL_WORKBENCH_pass"; // works when i put my pass but not sure how it
-                               //works when shared 
+String dbPassword = "add_your_SQL_WORKBENCH_pass"; // works when i put my pass it works but not sure how it
+                               //works when shared as we have diif passwords
 
 try {
     Class.forName("com.mysql.cj.jdbc.Driver");
