@@ -106,6 +106,7 @@ One group member submits:
 
 ## Current Folder Structure
 
+```text
 cs336-railway-booking-project/
 │
 ├── README.md
@@ -130,6 +131,7 @@ cs336-railway-booking-project/
             └── WEB-INF/
                 └── lib/
                     └── mysql-connector-j-9.7.0.jar
+```
 
 ## Folder Purposes
 
