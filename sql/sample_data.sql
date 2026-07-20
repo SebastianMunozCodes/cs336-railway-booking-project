@@ -68,3 +68,23 @@ VALUES
 (3, 3, 5, '13:22:00', '13:24:00'),
 (3, 4, 2, '13:35:00', '13:37:00'),
 (3, 5, 3, '13:40:00', NULL);
+
+INSERT INTO Employee
+(SSN, FirstName, LastName, Username, Password, Role)
+VALUES
+('111223333', 'System', 'Admin', 'admin', 'admin123', 'ADMIN'),
+('222334444', 'Sarah', 'Miller', 'rep1', 'rep123', 'REP'),
+('333445555', 'Michael', 'Davis', 'rep2', 'rep123', 'REP');
+
+INSERT INTO CustomerQuestion
+(QuestionText, Username)
+VALUES
+('Can I cancel my reservation before departure?', 'JOHN'),
+('Are senior discounts available on all transit lines?', 'ANNA'),
+('How do I view the stops for my train?', 'BOB');
+
+INSERT INTO CustomerReply
+(ReplyText, QuestionID, EmployeeSSN)
+VALUES
+('Yes. Current reservations can be cancelled before departure.', 1, '222334444'),
+('Yes. Senior passengers receive the applicable senior discount.', 2, '222334444');

@@ -110,3 +110,50 @@ CREATE TABLE Reservation (
         ON UPDATE CASCADE
         ON DELETE RESTRICT
 );
+
+CREATE TABLE Employee (
+    SSN CHAR(9),
+    FirstName VARCHAR(80) NOT NULL,
+    LastName VARCHAR(80) NOT NULL,
+    Username VARCHAR(80) NOT NULL UNIQUE,
+    Password VARCHAR(80) NOT NULL,
+    Role VARCHAR(20) NOT NULL,
+
+    PRIMARY KEY (SSN),
+
+    CHECK (Role IN ('ADMIN', 'REP'))
+);
+
+CREATE TABLE CustomerQuestion (
+    QuestionID INT AUTO_INCREMENT,
+    QuestionText TEXT NOT NULL,
+    QuestionDateTime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    Username VARCHAR(80) NOT NULL,
+
+    PRIMARY KEY (QuestionID),
+
+    FOREIGN KEY (Username)
+        REFERENCES Customer(Username)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+);
+
+CREATE TABLE CustomerReply (
+    ReplyID INT AUTO_INCREMENT,
+    ReplyText TEXT NOT NULL,
+    ReplyDateTime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    QuestionID INT NOT NULL,
+    EmployeeSSN CHAR(9) NOT NULL,
+
+    PRIMARY KEY (ReplyID),
+
+    FOREIGN KEY (QuestionID)
+        REFERENCES CustomerQuestion(QuestionID)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (EmployeeSSN)
+        REFERENCES Employee(SSN)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+);
