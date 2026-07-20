@@ -74,3 +74,39 @@ CREATE TABLE Stop (
         ON UPDATE CASCADE
         ON DELETE RESTRICT
 );
+
+CREATE TABLE Reservation (
+    ReservationNumber INT AUTO_INCREMENT,
+    ReservationDate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    TotalFare DECIMAL(8,2) NOT NULL,
+    TicketType VARCHAR(20) NOT NULL,
+    DiscountType VARCHAR(20) NOT NULL DEFAULT 'None',
+    Status VARCHAR(20) NOT NULL DEFAULT 'Current',
+
+    Username VARCHAR(80) NOT NULL,
+    ScheduleID INT NOT NULL,
+    OriginStationID INT NOT NULL,
+    DestinationStationID INT NOT NULL,
+
+    PRIMARY KEY (ReservationNumber),
+
+    FOREIGN KEY (Username)
+        REFERENCES Customer(Username)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (ScheduleID)
+        REFERENCES Schedule(ScheduleID)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+
+    FOREIGN KEY (OriginStationID)
+        REFERENCES Station(StationID)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+
+    FOREIGN KEY (DestinationStationID)
+        REFERENCES Station(StationID)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+);

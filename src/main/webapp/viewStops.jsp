@@ -99,7 +99,7 @@ String url =
     "jdbc:mysql://localhost:3306/railway_booking";
 
 String dbUser = "root";
-String dbPassword = "Smartie617";
+String dbPassword = "";
 
 Connection con = null;
 

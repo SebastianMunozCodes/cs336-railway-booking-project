@@ -1,5 +1,6 @@
 <%@ page import="java.sql.*" %>
 <%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="java.net.URLEncoder" %>
 
 <!DOCTYPE html>
 <html>
@@ -17,7 +18,7 @@ body {
 
 .container {
     width: 95%;
-    max-width: 1200px;
+    max-width: 1300px;
     margin: 70px auto;
     padding: 30px;
     background: white;
@@ -88,6 +89,7 @@ tr:nth-child(even) {
     color: white;
     text-decoration: none;
     border-radius: 4px;
+    white-space: nowrap;
 }
 
 .small-button:hover {
@@ -109,10 +111,15 @@ String destination = request.getParameter("destination");
 String travelDate = request.getParameter("travelDate");
 String sortBy = request.getParameter("sortBy");
 
-/*
-This controls which database column is used for sorting.
-The user can only choose departure, arrival, or fare.
-*/
+if (origin != null) {
+    origin = origin.trim();
+}
+
+if (destination != null) {
+    destination = destination.trim();
+}
+
+
 String orderBy = "s.DepartureDateTime";
 
 if ("arrival".equals(sortBy)) {
@@ -131,7 +138,7 @@ if ("arrival".equals(sortBy)) {
 
 String url = "jdbc:mysql://localhost:3306/railway_booking";
 String dbUser = "root";
-String dbPassword = "Smartie617";
+String dbPassword = "";
 
 Connection con = null;
 PreparedStatement ps = null;
@@ -145,48 +152,73 @@ SimpleDateFormat formatter =
 
 <div class="search-info">
 
-<strong>Origin:</strong> <%= origin %>
+<strong>Origin:</strong>
+<%= origin %>
 
 &nbsp;&nbsp;|&nbsp;&nbsp;
 
-<strong>Destination:</strong> <%= destination %>
+<strong>Destination:</strong>
+<%= destination %>
 
 &nbsp;&nbsp;|&nbsp;&nbsp;
 
-<strong>Date:</strong> <%= travelDate %>
+<strong>Date:</strong>
+<%= travelDate %>
 
 &nbsp;&nbsp;|&nbsp;&nbsp;
 
-<strong>Sorted By:</strong> <%= sortLabel %>
+<strong>Sorted By:</strong>
+<%= sortLabel %>
 
 </div>
 
 <%
-try {
+if (origin == null ||
+    destination == null ||
+    travelDate == null ||
+    origin.isEmpty() ||
+    destination.isEmpty() ||
+    travelDate.isEmpty()) {
+%>
 
-    Class.forName("com.mysql.cj.jdbc.Driver");
+<p class="message">
+Please provide an origin, destination, and travel date.
+</p>
 
-    con = DriverManager.getConnection(url, dbUser, dbPassword);
+<%
+} else {
 
-    String sql =
-        "SELECT s.ScheduleID, s.TrainID, s.DepartureDateTime, " +
-        "s.ArrivalDateTime, s.TravelTime, t.LineName, t.Fare " +
-        "FROM Schedule s " +
-        "JOIN TransitLine t ON s.LineName = t.LineName " +
-        "JOIN Station originStation ON t.OriginID = originStation.StationID " +
-        "JOIN Station destinationStation ON t.DestinationID = destinationStation.StationID " +
-        "WHERE originStation.StationName = ? " +
-        "AND destinationStation.StationName = ? " +
-        "AND DATE(s.DepartureDateTime) = ? " +
-        "ORDER BY " + orderBy;
+    try {
 
-    ps = con.prepareStatement(sql);
+        Class.forName("com.mysql.cj.jdbc.Driver");
 
-    ps.setString(1, origin);
-    ps.setString(2, destination);
-    ps.setString(3, travelDate);
+        con = DriverManager.getConnection(
+            url,
+            dbUser,
+            dbPassword
+        );
 
-    rs = ps.executeQuery();
+        String sql =
+            "SELECT s.ScheduleID, s.TrainID, s.DepartureDateTime, " +
+            "s.ArrivalDateTime, s.TravelTime, t.LineName, t.Fare " +
+            "FROM Schedule s " +
+            "JOIN TransitLine t ON s.LineName = t.LineName " +
+            "JOIN Station originStation " +
+            "ON t.OriginID = originStation.StationID " +
+            "JOIN Station destinationStation " +
+            "ON t.DestinationID = destinationStation.StationID " +
+            "WHERE originStation.StationName = ? " +
+            "AND destinationStation.StationName = ? " +
+            "AND DATE(s.DepartureDateTime) = ? " +
+            "ORDER BY " + orderBy;
+
+        ps = con.prepareStatement(sql);
+
+        ps.setString(1, origin);
+        ps.setString(2, destination);
+        ps.setString(3, travelDate);
+
+        rs = ps.executeQuery();
 %>
 
 <table>
@@ -200,6 +232,7 @@ try {
     <th>Travel Time</th>
     <th>Fare</th>
     <th>Stops</th>
+    <th>Reservation</th>
 </tr>
 
 <%
@@ -207,17 +240,26 @@ while (rs.next()) {
 
     found = true;
 
+    int scheduleID =
+        rs.getInt("ScheduleID");
+
     Timestamp departure =
         rs.getTimestamp("DepartureDateTime");
 
     Timestamp arrival =
         rs.getTimestamp("ArrivalDateTime");
+
+    String encodedOrigin =
+        URLEncoder.encode(origin, "UTF-8");
+
+    String encodedDestination =
+        URLEncoder.encode(destination, "UTF-8");
 %>
 
 <tr>
 
 <td>
-    <%= rs.getInt("ScheduleID") %>
+    <%= scheduleID %>
 </td>
 
 <td>
@@ -246,8 +288,15 @@ while (rs.next()) {
 
 <td>
     <a class="small-button"
-       href="viewStops.jsp?scheduleID=<%= rs.getInt("ScheduleID") %>">
+       href="viewStops.jsp?scheduleID=<%= scheduleID %>">
         View Stops
+    </a>
+</td>
+
+<td>
+    <a class="small-button"
+       href="makeReservation.jsp?scheduleID=<%= scheduleID %>&origin=<%= encodedOrigin %>&destination=<%= encodedDestination %>">
+        Reserve
     </a>
 </td>
 
@@ -270,39 +319,36 @@ No matching train schedules were found.
 <%
 }
 
-} catch (Exception e) {
+    } catch (Exception e) {
 %>
 
 <p class="message">
-
 Error:
 <br><br>
-
 <%= e.getMessage() %>
-
 </p>
 
 <%
-} finally {
+    } finally {
 
-    try {
+        try {
 
-        if (rs != null) {
-            rs.close();
+            if (rs != null) {
+                rs.close();
+            }
+
+            if (ps != null) {
+                ps.close();
+            }
+
+            if (con != null) {
+                con.close();
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-
-        if (ps != null) {
-            ps.close();
-        }
-
-        if (con != null) {
-            con.close();
-        }
-
-    } catch (SQLException e) {
-        e.printStackTrace();
     }
-
 }
 %>
 
