@@ -67,6 +67,13 @@
         <input type="password" name="password" required><br>
 
         <input type="submit" value="Login">
+        
+           <p style="text-align:center; margin-top:15px;">
+       
+        Don't have an account?
+        <a href="register.jsp">Register here</a>
+    </p>
+        
 
     </form>
 
