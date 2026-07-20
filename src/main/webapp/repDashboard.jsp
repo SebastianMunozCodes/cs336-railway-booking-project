@@ -63,9 +63,15 @@ a:hover {
 
     <p>Welcome, <strong><%= user %></strong>!</p>
 
-    <p>Representative functions will be available here.</p>
+    <p>Select a representative function below.</p>
 
-    <a href="logout.jsp">Logout</a>
+    <a href="repQuestions.jsp">
+        View Customer Questions
+    </a>
+
+    <a href="logout.jsp">
+        Logout
+    </a>
 
 </div>
 

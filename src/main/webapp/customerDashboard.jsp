@@ -27,7 +27,7 @@ body {
 
 .container {
     background-color: white;
-    width: 400px;
+    width: 550px;
     margin: auto;
     padding: 30px;
     border-radius: 10px;
@@ -40,7 +40,7 @@ h2 {
 
 a {
     display: inline-block;
-    margin-top: 20px;
+    margin: 10px;
     text-decoration: none;
     color: white;
     background-color: #d9534f;
@@ -62,20 +62,30 @@ a:hover {
     <h2>Customer Dashboard</h2>
 
     <p>Welcome, <strong><%= user %></strong>!</p>
-    
-<a class="button" href="search.jsp">
-    Search Train Schedules
-</a>
 
-<a class="button" href="myReservations.jsp">
-    My Reservations
-</a>
+    <a href="search.jsp">
+        Search Train Schedules
+    </a>
 
-<p>
-    You have successfully logged into the Railway Booking System.
-</p>
+    <a href="myReservations.jsp">
+        My Reservations
+    </a>
 
-    <a href="logout.jsp">Logout</a>
+    <a href="askQuestion.jsp">
+        Ask Customer Service
+    </a>
+
+    <a href="customerQuestions.jsp">
+        Browse Questions & Answers
+    </a>
+
+    <p>
+        You have successfully logged into the Railway Booking System.
+    </p>
+
+    <a href="logout.jsp">
+        Logout
+    </a>
 
 </div>
 
