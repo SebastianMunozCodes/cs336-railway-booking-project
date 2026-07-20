@@ -61,6 +61,7 @@ a:hover {
     <h2>Login Successful!</h2>
 
     <p>Welcome, <strong><%= user %></strong>!</p>
+    <a class="button" href="search.jsp">Search Train Schedules</a>
 
     <p>You have successfully logged into the Railway Booking System.</p>
 
