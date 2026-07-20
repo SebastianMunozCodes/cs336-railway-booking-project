@@ -27,7 +27,7 @@ body {
 
 .container {
     background-color: white;
-    width: 500px;
+    width: 600px;
     margin: auto;
     padding: 30px;
     border-radius: 10px;
@@ -63,9 +63,15 @@ a:hover {
 
     <p>Welcome, <strong><%= user %></strong>!</p>
 
-    <p>Admin functions will be available here.</p>
+    <p>Select an admin function below.</p>
 
-    <a href="logout.jsp">Logout</a>
+    <a href="manageReps.jsp">
+        Manage Customer Representatives
+    </a>
+
+    <a href="logout.jsp">
+        Logout
+    </a>
 
 </div>
 
