@@ -27,7 +27,7 @@ body {
 
 .container {
     background-color: white;
-    width: 500px;
+    width: 650px;
     margin: auto;
     padding: 30px;
     border-radius: 10px;
@@ -67,6 +67,18 @@ a:hover {
 
     <a href="repQuestions.jsp">
         View Customer Questions
+    </a>
+
+    <a href="manageSchedules.jsp">
+        Manage Train Schedules
+    </a>
+
+    <a href="stationSchedules.jsp">
+        Find Schedules by Station
+    </a>
+
+    <a href="customersByLineDate.jsp">
+        Find Customers by Transit Line and Date
     </a>
 
     <a href="logout.jsp">
