@@ -550,8 +550,8 @@ Error:
         Search Trains
     </a>
 
-    <a class="button" href="success.jsp">
-        Customer Home
+    <a class="button" href="customerDashboard.jsp">
+        Back to Dashboard
     </a>
 
 </div>

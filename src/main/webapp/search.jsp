@@ -118,7 +118,7 @@ input[type="submit"]:hover {
     </form>
 
     <div class="link-area">
-        <a href="success.jsp">Back to Account</a>
+        <a href="customerDashboard.jsp">Back to Dashboard</a>
     </div>
 
 </div>
