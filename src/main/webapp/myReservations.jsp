@@ -70,11 +70,21 @@ tr:nth-child(even) {
 .message {
     text-align: center;
     font-size: 18px;
+    font-weight: bold;
     margin: 25px 0;
+}
+
+.success-message {
+    color: green;
+}
+
+.error-message {
+    color: #cc0033;
 }
 
 .section-message {
     padding: 20px;
+    margin-top: 10px;
     background: #f7f7f7;
     border-radius: 5px;
     text-align: center;
@@ -99,13 +109,20 @@ tr:nth-child(even) {
     background: #a30029;
 }
 
+.cancel-form {
+    margin: 0;
+}
+
 .cancel-button {
     display: inline-block;
     padding: 8px 12px;
     background: #cc0033;
     color: white;
+    border: none;
     text-decoration: none;
     border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
 }
 
 .cancel-button:hover {
@@ -130,6 +147,11 @@ tr:nth-child(even) {
     font-weight: bold;
 }
 
+.past-status {
+    color: #555555;
+    font-weight: bold;
+}
+
 </style>
 </head>
 
@@ -140,12 +162,36 @@ tr:nth-child(even) {
 <h1>My Reservations</h1>
 
 <%
-String message =
-    request.getParameter("message");
+String message = request.getParameter("message");
 
-String url =
-    "jdbc:mysql://localhost:3306/railway_booking";
+if ("cancelled".equals(message)) {
+%>
 
+<p class="message success-message">
+    Your reservation was cancelled successfully.
+</p>
+
+<%
+} else if ("notFound".equals(message)) {
+%>
+
+<p class="message error-message">
+    The reservation could not be cancelled. It may have already departed,
+    already been cancelled, or may not belong to your account.
+</p>
+
+<%
+} else if ("error".equals(message)) {
+%>
+
+<p class="message error-message">
+    An error occurred while cancelling the reservation.
+</p>
+
+<%
+}
+
+String url = "jdbc:mysql://localhost:3306/railway_booking";
 String dbUser = "root";
 String dbPassword = "";
 
@@ -165,35 +211,22 @@ SimpleDateFormat reservationFormatter =
 %>
 
 <%
-if ("cancelled".equals(message)) {
-%>
-
-<p class="message">
-Your reservation was cancelled successfully.
-</p>
-
-<%
-} else if ("error".equals(message)) {
-%>
-
-<p class="message">
-The reservation could not be cancelled.
-</p>
-
-<%
-}
-
 try {
 
     Class.forName("com.mysql.cj.jdbc.Driver");
 
-    con =
-        DriverManager.getConnection(
-            url,
-            dbUser,
-            dbPassword
-        );
+    con = DriverManager.getConnection(
+        url,
+        dbUser,
+        dbPassword
+    );
 
+    /*
+     * Current reservations:
+     * 1. Belong to the logged-in customer
+     * 2. Have not departed yet
+     * 3. Have not been cancelled
+     */
     String currentSql =
         "SELECT r.ReservationNumber, r.ReservationDate, " +
         "r.TotalFare, r.TicketType, r.DiscountType, " +
@@ -202,27 +235,28 @@ try {
         "s.DepartureDateTime, s.ArrivalDateTime, " +
         "originStation.StationName AS OriginName, " +
         "destinationStation.StationName AS DestinationName " +
+
         "FROM Reservation r " +
+
         "JOIN Schedule s " +
         "ON r.ScheduleID = s.ScheduleID " +
+
         "JOIN Station originStation " +
         "ON r.OriginStationID = originStation.StationID " +
+
         "JOIN Station destinationStation " +
         "ON r.DestinationStationID = destinationStation.StationID " +
+
         "WHERE r.Username = ? " +
         "AND s.DepartureDateTime >= NOW() " +
+        "AND r.Status = 'Current' " +
+
         "ORDER BY s.DepartureDateTime";
 
-    currentPS =
-        con.prepareStatement(currentSql);
+    currentPS = con.prepareStatement(currentSql);
+    currentPS.setString(1, username);
 
-    currentPS.setString(
-        1,
-        username
-    );
-
-    currentRS =
-        currentPS.executeQuery();
+    currentRS = currentPS.executeQuery();
 
     boolean currentFound = false;
 %>
@@ -252,9 +286,6 @@ try {
 while (currentRS.next()) {
 
     currentFound = true;
-
-    String status =
-        currentRS.getString("Status");
 %>
 
 <tr>
@@ -310,25 +341,7 @@ while (currentRS.next()) {
 </td>
 
 <td>
-
-<%
-if ("Cancelled".equalsIgnoreCase(status)) {
-%>
-
-<span class="cancelled">
-    Cancelled
-</span>
-
-<%
-} else {
-%>
-
-<%= status %>
-
-<%
-}
-%>
-
+    Current
 </td>
 
 <td>
@@ -342,25 +355,20 @@ if ("Cancelled".equalsIgnoreCase(status)) {
 
 <td>
 
-<%
-if ("Current".equalsIgnoreCase(status)) {
-%>
+<form class="cancel-form"
+      action="cancelReservation.jsp"
+      method="post"
+      onsubmit="return confirm('Are you sure you want to cancel this reservation?');">
 
-<a class="cancel-button"
-   href="cancelReservation.jsp?reservationNumber=<%= currentRS.getInt("ReservationNumber") %>"
-   onclick="return confirm('Are you sure you want to cancel this reservation?');">
-    Cancel
-</a>
+    <input type="hidden"
+           name="reservationNumber"
+           value="<%= currentRS.getInt("ReservationNumber") %>">
 
-<%
-} else {
-%>
+    <input class="cancel-button"
+           type="submit"
+           value="Cancel">
 
-No Action
-
-<%
-}
-%>
+</form>
 
 </td>
 
@@ -383,6 +391,21 @@ if (!currentFound) {
 <%
 }
 
+if (currentRS != null) {
+    currentRS.close();
+    currentRS = null;
+}
+
+if (currentPS != null) {
+    currentPS.close();
+    currentPS = null;
+}
+
+/*
+ * Past reservations:
+ * 1. The train already departed, or
+ * 2. The reservation was cancelled
+ */
 String pastSql =
     "SELECT r.ReservationNumber, r.ReservationDate, " +
     "r.TotalFare, r.TicketType, r.DiscountType, " +
@@ -391,27 +414,30 @@ String pastSql =
     "s.DepartureDateTime, s.ArrivalDateTime, " +
     "originStation.StationName AS OriginName, " +
     "destinationStation.StationName AS DestinationName " +
+
     "FROM Reservation r " +
+
     "JOIN Schedule s " +
     "ON r.ScheduleID = s.ScheduleID " +
+
     "JOIN Station originStation " +
     "ON r.OriginStationID = originStation.StationID " +
+
     "JOIN Station destinationStation " +
     "ON r.DestinationStationID = destinationStation.StationID " +
+
     "WHERE r.Username = ? " +
-    "AND s.DepartureDateTime < NOW() " +
+    "AND (" +
+        "s.DepartureDateTime < NOW() " +
+        "OR r.Status = 'Cancelled'" +
+    ") " +
+
     "ORDER BY s.DepartureDateTime DESC";
 
-pastPS =
-    con.prepareStatement(pastSql);
+pastPS = con.prepareStatement(pastSql);
+pastPS.setString(1, username);
 
-pastPS.setString(
-    1,
-    username
-);
-
-pastRS =
-    pastPS.executeQuery();
+pastRS = pastPS.executeQuery();
 
 boolean pastFound = false;
 %>
@@ -440,6 +466,9 @@ boolean pastFound = false;
 while (pastRS.next()) {
 
     pastFound = true;
+
+    String pastStatus =
+        pastRS.getString("Status");
 %>
 
 <tr>
@@ -495,7 +524,27 @@ while (pastRS.next()) {
 </td>
 
 <td>
-    <%= pastRS.getString("Status") %>
+
+<%
+if ("Cancelled".equalsIgnoreCase(pastStatus)) {
+%>
+
+<span class="cancelled">
+    Cancelled
+</span>
+
+<%
+} else {
+%>
+
+<span class="past-status">
+    Past
+</span>
+
+<%
+}
+%>
+
 </td>
 
 <td>
@@ -529,37 +578,51 @@ if (!pastFound) {
 } catch (Exception e) {
 %>
 
-<p class="message">
-Error:
-<br><br>
-<%= e.getMessage() %>
+<p class="message error-message">
+    Error:
+    <br><br>
+    <%= e.getMessage() %>
 </p>
 
 <%
 } finally {
 
     try {
-
         if (currentRS != null) {
             currentRS.close();
         }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
 
+    try {
         if (pastRS != null) {
             pastRS.close();
         }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
 
+    try {
         if (currentPS != null) {
             currentPS.close();
         }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
 
+    try {
         if (pastPS != null) {
             pastPS.close();
         }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
 
+    try {
         if (con != null) {
             con.close();
         }
-
     } catch (SQLException e) {
         e.printStackTrace();
     }

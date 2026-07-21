@@ -82,9 +82,9 @@ try {
 
     if (rowsUpdated > 0) {
 
-        response.sendRedirect(
-            "myReservations.jsp?message=cancelled"
-        );
+    	response.sendRedirect(
+    		    "myReservations.jsp?message=notFound"
+    		);
 
     } else {
 
