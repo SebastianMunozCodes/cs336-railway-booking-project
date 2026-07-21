@@ -220,7 +220,7 @@ $<%= rs.getBigDecimal("Fare") %>
 
 </div>
 
-<form action="comfirmReservation.jsp" method="post">
+<form action="confirmReservation.jsp" method="post">
 
     <input
         type="hidden"
