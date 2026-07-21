@@ -15,6 +15,37 @@ String url = "jdbc:mysql://localhost:3306/railway_booking";
 String dbUser = "root";
 String dbPassword = "";
 
+String selectedMonth = request.getParameter("month");
+
+/*
+ * Default to the most recent month that has reservation data.
+ * With the current sample data, this should resolve to 2026-07.
+ */
+if (selectedMonth == null || selectedMonth.trim().isEmpty()) {
+
+    try (
+        Connection defaultCon =
+            DriverManager.getConnection(url, dbUser, dbPassword);
+
+        PreparedStatement defaultPS =
+            defaultCon.prepareStatement(
+                "SELECT DATE_FORMAT(MAX(ReservationDate), '%Y-%m') AS LatestMonth " +
+                "FROM Reservation"
+            );
+
+        ResultSet defaultRS =
+            defaultPS.executeQuery()
+    ) {
+
+        if (defaultRS.next()) {
+            selectedMonth = defaultRS.getString("LatestMonth");
+        }
+
+    } catch (Exception e) {
+        selectedMonth = null;
+    }
+}
+
 Connection con = null;
 PreparedStatement ps = null;
 ResultSet rs = null;
@@ -23,10 +54,13 @@ ResultSet rs = null;
 <!DOCTYPE html>
 <html>
 <head>
+
 <meta charset="UTF-8">
+
 <title>Top Five Transit Lines</title>
 
 <style>
+
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
@@ -47,13 +81,48 @@ h2 {
     color: #5cb85c;
 }
 
+.description {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+form {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+label {
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+input[type="month"] {
+    padding: 8px;
+    font-size: 15px;
+}
+
+button {
+    margin-left: 8px;
+    padding: 9px 16px;
+    border: none;
+    border-radius: 5px;
+    background-color: #5cb85c;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #449d44;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 25px;
 }
 
-th, td {
+th,
+td {
     border: 1px solid #ddd;
     padding: 10px;
     text-align: left;
@@ -81,6 +150,11 @@ a:hover {
 .back {
     text-align: center;
 }
+
+.no-data {
+    text-align: center;
+}
+
 </style>
 
 </head>
@@ -89,14 +163,43 @@ a:hover {
 
 <div class="container">
 
-<h2>Top Five Transit Lines</h2>
+<h2>Top Five Transit Lines by Month</h2>
+
+<p class="description">
+    Displays the five most active transit lines based on the number
+    of reservations made during the selected month.
+</p>
+
+<form method="get" action="topTransitLines.jsp">
+
+    <label for="month">
+        Select Month:
+    </label>
+
+    <input
+        type="month"
+        id="month"
+        name="month"
+        value="<%= selectedMonth != null ? selectedMonth : "" %>"
+        required
+    >
+
+    <button type="submit">
+        View Report
+    </button>
+
+</form>
+
+<%
+if (selectedMonth != null && !selectedMonth.trim().isEmpty()) {
+%>
 
 <table>
 
 <tr>
     <th>Rank</th>
     <th>Transit Line</th>
-    <th>Total Reservations</th>
+    <th>Reservations This Month</th>
 </tr>
 
 <%
@@ -111,19 +214,42 @@ try {
             dbPassword
         );
 
+    /*
+     * Start from TransitLine so that lines with zero reservations
+     * during the selected month are still considered.
+     *
+     * The month condition is placed inside the LEFT JOIN rather
+     * than WHERE so that zero-reservation lines are not removed.
+     */
     String sql =
         "SELECT " +
-        "s.LineName, " +
+        "tl.LineName, " +
         "COUNT(r.ReservationNumber) AS ReservationCount " +
-        "FROM Schedule s " +
+
+        "FROM TransitLine tl " +
+
+        "LEFT JOIN Schedule s " +
+        "ON tl.LineName = s.LineName " +
+
         "LEFT JOIN Reservation r " +
         "ON s.ScheduleID = r.ScheduleID " +
         "AND r.Status <> 'Cancelled' " +
-        "GROUP BY s.LineName " +
-        "ORDER BY ReservationCount DESC, s.LineName " +
+        "AND DATE_FORMAT(r.ReservationDate, '%Y-%m') = ? " +
+
+        "GROUP BY tl.LineName " +
+
+        "ORDER BY " +
+        "ReservationCount DESC, " +
+        "tl.LineName " +
+
         "LIMIT 5";
 
     ps = con.prepareStatement(sql);
+
+    ps.setString(
+        1,
+        selectedMonth
+    );
 
     rs = ps.executeQuery();
 
@@ -159,9 +285,11 @@ try {
 %>
 
 <tr>
-    <td colspan="3" style="text-align:center;">
-        No transit line reservation data found.
+
+    <td colspan="3" class="no-data">
+        No transit line data found.
     </td>
+
 </tr>
 
 <%
@@ -171,30 +299,42 @@ try {
 %>
 
 <tr>
+
     <td colspan="3">
         Error loading top transit lines:
         <%= e.getMessage() %>
     </td>
+
 </tr>
 
 <%
 } finally {
 
     try {
-        if (rs != null) rs.close();
+        if (rs != null) {
+            rs.close();
+        }
     } catch (SQLException e) {}
 
     try {
-        if (ps != null) ps.close();
+        if (ps != null) {
+            ps.close();
+        }
     } catch (SQLException e) {}
 
     try {
-        if (con != null) con.close();
+        if (con != null) {
+            con.close();
+        }
     } catch (SQLException e) {}
 }
 %>
 
 </table>
+
+<%
+}
+%>
 
 <div class="back">
 

@@ -2,6 +2,16 @@
 <%@ page import="java.math.BigDecimal" %>
 <%@ page import="java.math.RoundingMode" %>
 
+<%
+String user = (String) session.getAttribute("user");
+String role = (String) session.getAttribute("role");
+
+if (user == null || role == null || !"CUSTOMER".equals(role)) {
+    response.sendRedirect("index.jsp");
+    return;
+}
+%>
+
 <!DOCTYPE html>
 <html>
 <head>

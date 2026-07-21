@@ -1,6 +1,16 @@
 <%@ page import="java.sql.*" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 
+<%
+String username = (String) session.getAttribute("user");
+String role = (String) session.getAttribute("role");
+
+if (username == null || role == null || !"CUSTOMER".equals(role)) {
+    response.sendRedirect("index.jsp");
+    return;
+}
+%>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -17,7 +27,7 @@ body {
 
 .container {
     width: 95%;
-    max-width: 1300px;
+    max-width: 1400px;
     margin: 50px auto;
     padding: 30px;
     background: white;
@@ -102,6 +112,19 @@ tr:nth-child(even) {
     background: #a30029;
 }
 
+.itinerary-button {
+    display: inline-block;
+    padding: 8px 12px;
+    background: #337ab7;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+.itinerary-button:hover {
+    background: #286090;
+}
+
 .cancelled {
     color: #cc0033;
     font-weight: bold;
@@ -117,9 +140,6 @@ tr:nth-child(even) {
 <h1>My Reservations</h1>
 
 <%
-String username =
-    (String) session.getAttribute("user");
-
 String message =
     request.getParameter("message");
 
@@ -145,25 +165,7 @@ SimpleDateFormat reservationFormatter =
 %>
 
 <%
-if (username == null) {
-%>
-
-<p class="message">
-You must be logged in to view your reservations.
-</p>
-
-<div class="button-area">
-
-    <a class="button" href="index.jsp">
-        Go to Login
-    </a>
-
-</div>
-
-<%
-} else {
-
-    if ("cancelled".equals(message)) {
+if ("cancelled".equals(message)) {
 %>
 
 <p class="message">
@@ -171,7 +173,7 @@ Your reservation was cancelled successfully.
 </p>
 
 <%
-    } else if ("error".equals(message)) {
+} else if ("error".equals(message)) {
 %>
 
 <p class="message">
@@ -179,50 +181,50 @@ The reservation could not be cancelled.
 </p>
 
 <%
-    }
+}
 
-    try {
+try {
 
-        Class.forName("com.mysql.cj.jdbc.Driver");
+    Class.forName("com.mysql.cj.jdbc.Driver");
 
-        con =
-            DriverManager.getConnection(
-                url,
-                dbUser,
-                dbPassword
-            );
-
-        String currentSql =
-            "SELECT r.ReservationNumber, r.ReservationDate, " +
-            "r.TotalFare, r.TicketType, r.DiscountType, " +
-            "r.Status, r.ScheduleID, " +
-            "s.TrainID, s.LineName, " +
-            "s.DepartureDateTime, s.ArrivalDateTime, " +
-            "originStation.StationName AS OriginName, " +
-            "destinationStation.StationName AS DestinationName " +
-            "FROM Reservation r " +
-            "JOIN Schedule s " +
-            "ON r.ScheduleID = s.ScheduleID " +
-            "JOIN Station originStation " +
-            "ON r.OriginStationID = originStation.StationID " +
-            "JOIN Station destinationStation " +
-            "ON r.DestinationStationID = destinationStation.StationID " +
-            "WHERE r.Username = ? " +
-            "AND s.DepartureDateTime >= NOW() " +
-            "ORDER BY s.DepartureDateTime";
-
-        currentPS =
-            con.prepareStatement(currentSql);
-
-        currentPS.setString(
-            1,
-            username
+    con =
+        DriverManager.getConnection(
+            url,
+            dbUser,
+            dbPassword
         );
 
-        currentRS =
-            currentPS.executeQuery();
+    String currentSql =
+        "SELECT r.ReservationNumber, r.ReservationDate, " +
+        "r.TotalFare, r.TicketType, r.DiscountType, " +
+        "r.Status, r.ScheduleID, " +
+        "s.TrainID, s.LineName, " +
+        "s.DepartureDateTime, s.ArrivalDateTime, " +
+        "originStation.StationName AS OriginName, " +
+        "destinationStation.StationName AS DestinationName " +
+        "FROM Reservation r " +
+        "JOIN Schedule s " +
+        "ON r.ScheduleID = s.ScheduleID " +
+        "JOIN Station originStation " +
+        "ON r.OriginStationID = originStation.StationID " +
+        "JOIN Station destinationStation " +
+        "ON r.DestinationStationID = destinationStation.StationID " +
+        "WHERE r.Username = ? " +
+        "AND s.DepartureDateTime >= NOW() " +
+        "ORDER BY s.DepartureDateTime";
 
-        boolean currentFound = false;
+    currentPS =
+        con.prepareStatement(currentSql);
+
+    currentPS.setString(
+        1,
+        username
+    );
+
+    currentRS =
+        currentPS.executeQuery();
+
+    boolean currentFound = false;
 %>
 
 <h2>Current Reservations</h2>
@@ -242,6 +244,7 @@ The reservation could not be cancelled.
     <th>Discount</th>
     <th>Fare</th>
     <th>Status</th>
+    <th>Itinerary</th>
     <th>Action</th>
 </tr>
 
@@ -330,6 +333,15 @@ if ("Cancelled".equalsIgnoreCase(status)) {
 
 <td>
 
+<a class="itinerary-button"
+   href="viewStops.jsp?scheduleID=<%= currentRS.getInt("ScheduleID") %>">
+    View Itinerary
+</a>
+
+</td>
+
+<td>
+
 <%
 if ("Current".equalsIgnoreCase(status)) {
 %>
@@ -371,37 +383,37 @@ if (!currentFound) {
 <%
 }
 
-        String pastSql =
-            "SELECT r.ReservationNumber, r.ReservationDate, " +
-            "r.TotalFare, r.TicketType, r.DiscountType, " +
-            "r.Status, r.ScheduleID, " +
-            "s.TrainID, s.LineName, " +
-            "s.DepartureDateTime, s.ArrivalDateTime, " +
-            "originStation.StationName AS OriginName, " +
-            "destinationStation.StationName AS DestinationName " +
-            "FROM Reservation r " +
-            "JOIN Schedule s " +
-            "ON r.ScheduleID = s.ScheduleID " +
-            "JOIN Station originStation " +
-            "ON r.OriginStationID = originStation.StationID " +
-            "JOIN Station destinationStation " +
-            "ON r.DestinationStationID = destinationStation.StationID " +
-            "WHERE r.Username = ? " +
-            "AND s.DepartureDateTime < NOW() " +
-            "ORDER BY s.DepartureDateTime DESC";
+String pastSql =
+    "SELECT r.ReservationNumber, r.ReservationDate, " +
+    "r.TotalFare, r.TicketType, r.DiscountType, " +
+    "r.Status, r.ScheduleID, " +
+    "s.TrainID, s.LineName, " +
+    "s.DepartureDateTime, s.ArrivalDateTime, " +
+    "originStation.StationName AS OriginName, " +
+    "destinationStation.StationName AS DestinationName " +
+    "FROM Reservation r " +
+    "JOIN Schedule s " +
+    "ON r.ScheduleID = s.ScheduleID " +
+    "JOIN Station originStation " +
+    "ON r.OriginStationID = originStation.StationID " +
+    "JOIN Station destinationStation " +
+    "ON r.DestinationStationID = destinationStation.StationID " +
+    "WHERE r.Username = ? " +
+    "AND s.DepartureDateTime < NOW() " +
+    "ORDER BY s.DepartureDateTime DESC";
 
-        pastPS =
-            con.prepareStatement(pastSql);
+pastPS =
+    con.prepareStatement(pastSql);
 
-        pastPS.setString(
-            1,
-            username
-        );
+pastPS.setString(
+    1,
+    username
+);
 
-        pastRS =
-            pastPS.executeQuery();
+pastRS =
+    pastPS.executeQuery();
 
-        boolean pastFound = false;
+boolean pastFound = false;
 %>
 
 <h2>Past Reservations</h2>
@@ -421,6 +433,7 @@ if (!currentFound) {
     <th>Discount</th>
     <th>Fare</th>
     <th>Status</th>
+    <th>Itinerary</th>
 </tr>
 
 <%
@@ -485,6 +498,15 @@ while (pastRS.next()) {
     <%= pastRS.getString("Status") %>
 </td>
 
+<td>
+
+<a class="itinerary-button"
+   href="viewStops.jsp?scheduleID=<%= pastRS.getInt("ScheduleID") %>">
+    View Itinerary
+</a>
+
+</td>
+
 </tr>
 
 <%
@@ -504,7 +526,7 @@ if (!pastFound) {
 <%
 }
 
-    } catch (Exception e) {
+} catch (Exception e) {
 %>
 
 <p class="message">
@@ -514,34 +536,34 @@ Error:
 </p>
 
 <%
-    } finally {
+} finally {
 
-        try {
+    try {
 
-            if (currentRS != null) {
-                currentRS.close();
-            }
-
-            if (pastRS != null) {
-                pastRS.close();
-            }
-
-            if (currentPS != null) {
-                currentPS.close();
-            }
-
-            if (pastPS != null) {
-                pastPS.close();
-            }
-
-            if (con != null) {
-                con.close();
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (currentRS != null) {
+            currentRS.close();
         }
+
+        if (pastRS != null) {
+            pastRS.close();
+        }
+
+        if (currentPS != null) {
+            currentPS.close();
+        }
+
+        if (pastPS != null) {
+            pastPS.close();
+        }
+
+        if (con != null) {
+            con.close();
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
     }
+}
 %>
 
 <div class="button-area">
@@ -555,10 +577,6 @@ Error:
     </a>
 
 </div>
-
-<%
-}
-%>
 
 </div>
 

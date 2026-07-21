@@ -2,6 +2,16 @@
     contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 
+<%
+String user = (String) session.getAttribute("user");
+String role = (String) session.getAttribute("role");
+
+if (user == null || role == null || !"CUSTOMER".equals(role)) {
+    response.sendRedirect("index.jsp");
+    return;
+}
+%>
+
 <!DOCTYPE html>
 <html>
 <head>

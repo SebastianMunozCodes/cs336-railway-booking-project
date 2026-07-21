@@ -4,6 +4,9 @@
 String username =
     (String) session.getAttribute("user");
 
+String role =
+    (String) session.getAttribute("role");
+
 String reservationNumberText =
     request.getParameter("reservationNumber");
 
@@ -16,7 +19,9 @@ String dbPassword = "";
 Connection con = null;
 PreparedStatement ps = null;
 
-if (username == null) {
+if (username == null ||
+    role == null ||
+    !"CUSTOMER".equals(role)) {
 
     response.sendRedirect("index.jsp");
     return;

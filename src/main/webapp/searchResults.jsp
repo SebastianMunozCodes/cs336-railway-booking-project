@@ -2,6 +2,16 @@
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.net.URLEncoder" %>
 
+<%
+String user = (String) session.getAttribute("user");
+String role = (String) session.getAttribute("role");
+
+if (user == null || role == null || !"CUSTOMER".equals(role)) {
+    response.sendRedirect("index.jsp");
+    return;
+}
+%>
+
 <!DOCTYPE html>
 <html>
 <head>

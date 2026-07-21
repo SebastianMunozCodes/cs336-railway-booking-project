@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Login</title>
+    <title>Railway Booking Login</title>
 
     <style>
         body {
@@ -56,7 +56,7 @@
 
 <div class="login-box">
 
-    <h2>Customer Login</h2>
+    <h2>Railway Booking Login</h2>
 
     <form action="checkLoginDetails.jsp" method="post">
 
@@ -67,13 +67,11 @@
         <input type="password" name="password" required><br>
 
         <input type="submit" value="Login">
-        
-           <p style="text-align:center; margin-top:15px;">
-       
-        Don't have an account?
-        <a href="register.jsp">Register here</a>
-    </p>
-        
+
+        <p style="text-align:center; margin-top:15px;">
+            Don't have a customer account?
+            <a href="register.jsp">Register here</a>
+        </p>
 
     </form>
 
@@ -81,4 +79,4 @@
 
 </body>
 
-</html> 
+</html>
