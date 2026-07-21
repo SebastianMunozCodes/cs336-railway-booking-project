@@ -15,19 +15,19 @@ if (user == null || role == null || !"ADMIN".equals(role)) {
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Admin Dashboard</title>
+<title>Admin Reports</title>
 
 <style>
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
     text-align: center;
-    margin-top: 100px;
+    margin-top: 80px;
 }
 
 .container {
     background-color: white;
-    width: 600px;
+    width: 700px;
     margin: auto;
     padding: 30px;
     border-radius: 10px;
@@ -59,23 +59,41 @@ a:hover {
 
 <div class="container">
 
-    <h2>Admin Dashboard</h2>
+    <h2>Admin Reports</h2>
 
-    <p>Welcome, <strong><%= user %></strong>!</p>
+    <a href="monthlySales.jsp">
+        Monthly Sales
+    </a>
 
-    <p>Select an admin function below.</p>
+    <a href="reservationsByLine.jsp">
+        Reservations by Transit Line
+    </a>
 
-	<a href="manageReps.jsp">
-	    Manage Customer Representatives
-	</a>
+    <a href="reservationsByCustomer.jsp">
+        Reservations by Customer
+    </a>
 
-	<a href="adminReports.jsp">
-	    View Reports
-	</a>
+    <a href="revenueByLine.jsp">
+        Revenue by Transit Line
+    </a>
 
-	<a href="logout.jsp">
-	    Logout
-	</a>
+    <a href="revenueByCustomer.jsp">
+        Revenue by Customer
+    </a>
+
+    <a href="bestCustomer.jsp">
+        Best Customer
+    </a>
+
+    <a href="topTransitLines.jsp">
+        Top Five Transit Lines
+    </a>
+
+    <br>
+
+    <a href="adminDashboard.jsp">
+        Back to Admin Dashboard
+    </a>
 
 </div>
 
