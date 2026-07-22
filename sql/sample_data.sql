@@ -29,7 +29,7 @@ INSERT INTO TransitLine (LineName, Fare, OriginID, DestinationID)
 VALUES
 ('Northeast Line', 15.00, 1, 4),
 ('New York Express', 25.00, 1, 5),
-('Newark to New York', 12.00, 4, 5),
+('Edison to Metropark', 12.00, 4, 5),
 ('Metropark Express', 18.00, 5, 3),
 ('Edison Local', 10.00, 4, 2);
 
@@ -151,18 +151,18 @@ INSERT INTO Reservation
     DestinationStationID
 )
 VALUES
-('2026-07-20 15:47:44', 22.50, 'Round-Trip', 'Child',    'Current',   'JOHN', 1, 1, 2),
-('2026-07-20 15:48:37', 30.00, 'Round-Trip', 'None',     'Cancelled', 'JOHN', 1, 1, 2),
-('2026-07-20 15:57:15',  9.75, 'One-Way',    'Senior',   'Current',   'JOHN', 1, 1, 2),
-('2026-07-21 11:47:01', 15.00, 'Round-Trip', 'Disabled', 'Current',   'JOHN', 1, 1, 2),
-('2026-07-21 11:47:42', 11.25, 'One-Way',    'Child',    'Current',   'JOHN', 1, 1, 2),
+('2026-07-20 15:47:44', 22.50, 'Round-Trip', 'Child',    'Current',   'JOHN', 1, 1, 4),
+('2026-07-20 15:48:37', 30.00, 'Round-Trip', 'None',     'Cancelled', 'JOHN', 1, 1, 4),
+('2026-07-20 15:57:15',  9.75, 'One-Way',    'Senior',   'Current',   'JOHN', 1, 1, 4),
+('2026-07-21 11:47:01', 15.00, 'Round-Trip', 'Disabled', 'Current',   'JOHN', 1, 1, 4),
+('2026-07-21 11:47:42', 11.25, 'One-Way',    'Child',    'Current',   'JOHN', 1, 1, 4),
 
-('2026-07-21 11:49:37', 18.75, 'One-Way', 'Child',  'Current', 'JOHN', 2, 1, 3),
-('2026-07-21 12:02:35', 25.00, 'One-Way', 'None',   'Current', 'JOHN', 2, 1, 3),
+('2026-07-21 11:49:37', 18.75, 'One-Way', 'Child', 'Current', 'JOHN', 2, 1, 5),
+('2026-07-21 12:02:35', 25.00, 'One-Way', 'None',  'Current', 'JOHN', 2, 1, 5),
 
-('2026-07-21 12:17:39', 7.80, 'One-Way', 'Senior', 'Cancelled', 'JOHN', 3, 2, 3),
+('2026-07-21 12:17:39', 7.80, 'One-Way', 'Senior', 'Cancelled', 'JOHN', 3, 4, 5),
 
-('2026-07-21 12:32:57', 11.25, 'One-Way', 'Child', 'Current', 'JOHN', 4, 1, 2),
+('2026-07-21 12:32:57', 11.25, 'One-Way', 'Child', 'Current', 'JOHN', 4, 1, 4),
 
 ('2026-07-21 13:53:12', 15.00, 'One-Way', 'None', 'Current', 'ANNA', 4, 1, 4),
 ('2026-07-21 13:54:31', 15.00, 'One-Way', 'None', 'Current', 'ANNA', 1, 1, 4),

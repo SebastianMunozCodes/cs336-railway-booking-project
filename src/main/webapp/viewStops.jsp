@@ -385,7 +385,7 @@ Error:
 <div class="button-area">
 
 <a class="button" href="javascript:history.back()">
-Back to Search Results
+Back
 </a>
 
 </div>

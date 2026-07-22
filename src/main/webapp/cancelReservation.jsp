@@ -83,13 +83,13 @@ try {
     if (rowsUpdated > 0) {
 
     	response.sendRedirect(
-    		    "myReservations.jsp?message=notFound"
+    		    "myReservations.jsp?message=cancelled"
     		);
 
     } else {
 
         response.sendRedirect(
-            "myReservations.jsp?message=error"
+            "myReservations.jsp?message=notFound"
         );
     }
 
